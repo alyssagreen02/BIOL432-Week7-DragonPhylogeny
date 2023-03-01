@@ -1,0 +1,140 @@
+---
+title: "Dragon Phylogeny"
+author: "Alyssa Green"
+date: "2023-03-01"
+output: html_document
+---
+
+## Load library and read nexus file
+```{r}
+library(ape)
+DragonNexus=read.nexus.data("DragonMatrix.nex")
+head(DragonNexus)
+```
+## Code my dragons and add them to the nexus file
+```{r}
+P=list('1','0','0','1','1','1','1','1','0','1','0','0','1','0','0','1','1','0','0','0','0','1','0','0','0','0','0','1','1','0','0','1','1','0','0','0','0','0','0','0','0','1','1','0','?','?','?','?','?','?','0','0','0','1','0','0','0','0','0','0','0','1','1','1','0','0','0','0','0','0','1','0','0','1','1','0','1','0')
+
+G=list('1','0','0','1','0','1','1','1','0','1','?','?','?','?','0','1','0','0','1','0','0','0','0','0','1','0','0','1','1','1','0','1','0','0','0','1','1','0','1','1','0','0','0','0','1','1','0','0','0','0','1','1','0','0','1','0','?','?','?','?','?','?','?','?','?','?','?','?','?','?','0','1','1','1','1','1','0','0')
+
+R=list('1','0','1','0','0','1','1','1','1','0','0','0','0','0','1','1','0','0','0','0','0','0','0','1','0','0','1','1','0','1','0','0','0','0','0','0','1','0','0','0','1','1','0','0','0','0','0','0','1','1','0','0','0','0','0','?','?','?','?','0','1','0','0','0','0','0','?','?','?','0','0','0','1','1','0','0','1')
+
+
+
+P=as.character(P)
+G=as.character(G)
+R=as.character(R)
+PGR=list(P,G,R)
+DragonNexusFinal=c(DragonNexus, PGR)
+
+
+names(DragonNexusFinal)[78]="75PinkXXXX"
+names(DragonNexusFinal)[79]="76GreenXXX"
+names(DragonNexusFinal)[80]="77RainbowX"
+```
+
+## Export nexus file and save to input folder
+```{r}
+write.nexus.data(DragonNexusFinal, "./input/DragonNexusFinal.nexus")
+```
+
+
+## Convert nexus file to data frame
+```{r}
+DragonNexusDF=data.frame(matrix(unlist(DragonNexusFinal), ncol=78, byrow=T))
+row.names(DragonNexusDF)=names(DragonNexusFinal)
+head(DragonNexusDF)
+```
+
+## Input weights data
+```{r}
+weightsDat=read.csv("Weights.csv")
+```
+
+## create a single vecor of weights
+```{r}
+Weights=paste0(weightsDat$Weight,collapse = "")
+Weights=strsplit(Weights, split = "")[[1]]
+```
+
+
+## Convert each letter to a value
+```{r}
+WeightsNum=rep(NA,length(Weights))
+for (i in 1:length(WeightsNum)) {
+  if(Weights[i] %in% LETTERS){
+    WeightsNum[i]=which(LETTERS==Weights[i])+9
+  } else {
+    WeightsNum[i]=Weights[i]
+  }
+  
+}
+
+WeightsNum=as.numeric(WeightsNum)
+```
+
+```{r}
+length(WeightsNum)
+```
+
+## Multiply weight value by the trait vector for each dragon
+```{r}
+WtDragonNexus=DragonNexusFinal
+for (i in 1:length(DragonNexusFinal)) {
+  RepWeight=DragonNexusFinal[[i]]==1
+  WtDragonNexus[[i]][RepWeight]=WeightsNum[RepWeight]
+  RepWeight=NA
+}
+```
+
+## Calculate the distance matrix
+```{r}
+WtDragonNexusDF=data.frame(matrix(unlist(WtDragonNexus), ncol=78,byrow=T))
+row.names(WtDragonNexusDF)=names(WtDragonNexus)
+WtDragonDist=dist(WtDragonNexusDF, method = "euclidean")
+```
+## Images of Dragons
+![75PinkXXXX](images\pink.png)
+Citation: Classic Pink Dragon. (2019). Dragon Shield. Retrieved March 1, 2023, from https://twitter.com/dragonshield_/status/1186643372796268547. 
+
+![76GreenXXX](images\green.jpg)
+Citation: Sandara. (2015). Green Dragon v2. Deviant Art. Retrieved March 1, 2023, from https://www.deviantart.com/sandara/art/Green-Dragon-v2-579637253. 
+
+![77RainbowX](images\rainbow.jpg)
+Citation: Christou, A. (n.d.). Rainbow Dragon. A Christou Art. Retrieved March 1, 2023, from https://www.achristouart.com/rainbow-dragon. 
+
+
+## Plot Tree
+```{r}
+library(ggtree)
+WtDragonTree=fastme.bal(WtDragonDist)
+ggtree(WtDragonTree, layout="circular")
+```
+
+## Get tip labels by country
+```{r}
+Country=gsub("[0-9\\.]+([^X]+)x*","\\1", WtDragonTree$tip.label)
+```
+
+## Isolate tip labels for my dragons
+```{r}
+CountryGroups=split(WtDragonTree$tip.label, Country)
+Groups=list(CountryGroups$PinkXXXX,CountryGroups$GreenXXX, CountryGroups$RainbowX)
+names(Groups)[1]="PinkXXXX"
+names(Groups)[2]="GreenXXX"
+names(Groups)[3]="RainbowX"
+```
+
+## Make plotting data
+```{r}
+WtDTcol=groupOTU(WtDragonTree, Groups)
+```
+
+```{r}
+ggtree(WtDTcol, layout="circular", aes(colour=group))+geom_tiplab(size=2, aes(angle=angle))
+```
+Figure 1: Dragon phylogeny. The phylogeny is coloured to highlight the three added dragons. Green, labelled GreenXXX, identifies dragon 76GreenXXX. Blue, labelled PinkXXXX, identifies dragon 75PinkXXXX. Purple, labelled RainbowX, identifies dragon 77Rainbow X. Orange, labelled 0, denotes all other dragons. 
+
+## Backstory and Data Interpretation
+
+The pink, green, and rainbow dragons are highly elusive creatures rarely seen. We collected data on these dragons' phenotypic characteristics using documentation from rare civilian citings. Using this information, we created a phylogeny, mapping the three dragons and all dragons from the known dragon database. The information we received from this phylogeny was very intriguing. The three dragons are members of the same clade, with the rainbow dragon first deviating from the ancestral population. The green and pink dragons then likely deviated from the ancestral population simultaneously as one species, later separating into the species now known as green and pink dragons. These dragons are most similar to those known to originate from Japan and are likely closely related. The phylogeny also demonstrates that these dragons are more closely related to the mammal outgroup than the fish and snake outgroups. This study is significant as it provides more insight into our planet's little-known species of dragons.
