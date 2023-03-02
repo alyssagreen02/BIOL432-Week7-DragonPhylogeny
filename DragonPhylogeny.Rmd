@@ -5,6 +5,8 @@ date: "2023-03-01"
 output: html_document
 ---
 
+[Link to GitHub](https://github.com/alyssagreen02/BIOL432-Week7-DragonPhylogeny)
+
 ## Load library and read nexus file
 ```{r}
 library(ape)
@@ -51,7 +53,7 @@ head(DragonNexusDF)
 weightsDat=read.csv("Weights.csv")
 ```
 
-## create a single vecor of weights
+## create a single vector of weights
 ```{r}
 Weights=paste0(weightsDat$Weight,collapse = "")
 Weights=strsplit(Weights, split = "")[[1]]
@@ -120,9 +122,9 @@ Country=gsub("[0-9\\.]+([^X]+)x*","\\1", WtDragonTree$tip.label)
 ```{r}
 CountryGroups=split(WtDragonTree$tip.label, Country)
 Groups=list(CountryGroups$PinkXXXX,CountryGroups$GreenXXX, CountryGroups$RainbowX)
-names(Groups)[1]="PinkXXXX"
-names(Groups)[2]="GreenXXX"
-names(Groups)[3]="RainbowX"
+names(Groups)[1]="75PinkXXXX"
+names(Groups)[2]="76GreenXXX"
+names(Groups)[3]="77RainbowX"
 ```
 
 ## Make plotting data
@@ -131,10 +133,10 @@ WtDTcol=groupOTU(WtDragonTree, Groups)
 ```
 
 ```{r}
-ggtree(WtDTcol, layout="circular", aes(colour=group))+geom_tiplab(size=2, aes(angle=angle))
+ggtree(WtDTcol, layout="circular", aes(colour=group))+geom_tiplab(size=1, aes(angle=angle))
 ```
-Figure 1: Dragon phylogeny. The phylogeny is coloured to highlight the three added dragons. Green, labelled GreenXXX, identifies dragon 76GreenXXX. Blue, labelled PinkXXXX, identifies dragon 75PinkXXXX. Purple, labelled RainbowX, identifies dragon 77Rainbow X. Orange, labelled 0, denotes all other dragons. 
+Figure 1: Dragon phylogeny. The phylogeny represents the relationship between dragons based on their phenotypic characteristics. The phylogeny is coloured coded to highlight the three added dragons, with blue for dragon 76GreenXXX, green\ for dragon 75PinkXXXX and purple for dragon 77RainbowX. The colour orange, labelled 0, denotes all other dragons.
 
 ## Backstory and Data Interpretation
 
-The pink, green, and rainbow dragons are highly elusive creatures rarely seen. We collected data on these dragons' phenotypic characteristics using documentation from rare civilian citings. Using this information, we created a phylogeny, mapping the three dragons and all dragons from the known dragon database. The information we received from this phylogeny was very intriguing. The three dragons are members of the same clade, with the rainbow dragon first deviating from the ancestral population. The green and pink dragons then likely deviated from the ancestral population simultaneously as one species, later separating into the species now known as green and pink dragons. These dragons are most similar to those known to originate from Japan and are likely closely related. The phylogeny also demonstrates that these dragons are more closely related to the mammal outgroup than the fish and snake outgroups. This study is significant as it provides more insight into our planet's little-known species of dragons.
+The pink, green, and rainbow dragons are highly elusive and rarely witnessed. We collected data on these dragons’ phenotypic characteristics using documentation from rare civilian sightings. From this data, we created a phylogeny, mapping the pink, green, and rainbow dragons relative to those from the known dragon database. The information we received from this phylogeny was very intriguing. The pink, green, and rainbow dragons are members of the same clade, with the rainbow dragon deviating first from the ancestral population. The pink and green dragons deviated from the ancestral population after the rainbow dragon, simultaneously as one species, later diverging into separate species. The pink, green, and rainbow dragons are most similar to those known to originate from Japan and therefore are closely related to the Japanese dragons. The phylogeny also shows that the pink, green, and rainbow dragons are more closely related to the mammal outgroup than the fish and snake outgroups. This study is significant as it provides insight into our planet’s little-known species of dragons.
